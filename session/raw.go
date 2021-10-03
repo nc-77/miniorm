@@ -29,9 +29,9 @@ func (s *Session) toSql() (sql string) {
 	return
 }
 
-func (s *Session) Clear() {
+func (s *Session) clear() {
 	s.sql.Reset()
-	s.sqlArgs = nil
+	s.sqlArgs = make([]interface{}, 0)
 }
 
 func (s *Session) Raw(sql string, args ...interface{}) *Session {
@@ -41,9 +41,28 @@ func (s *Session) Raw(sql string, args ...interface{}) *Session {
 }
 
 func (s *Session) Exec() (result sql.Result, err error) {
-	defer s.Clear()
+	defer s.clear()
 	log.Info(s.toSql())
 	if result, err = s.db.Exec(s.sql.String(), s.sqlArgs...); err != nil {
+		log.Error(err)
+	}
+	return
+}
+
+func (s *Session) Query() (rows *sql.Rows, err error) {
+	defer s.clear()
+	log.Info(s.toSql())
+	if rows, err = s.db.Query(s.sql.String(), s.sqlArgs...); err != nil {
+		log.Error(err)
+	}
+	return
+}
+
+func (s *Session) QueryRow() (row *sql.Row, err error) {
+	defer s.clear()
+	log.Info(s.toSql())
+	row = s.db.QueryRow(s.sql.String(), s.sqlArgs...)
+	if err = row.Err(); err != nil {
 		log.Error(err)
 	}
 	return

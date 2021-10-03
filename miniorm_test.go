@@ -7,7 +7,7 @@ import (
 )
 
 func TestOpenDB(t *testing.T) {
-	dsn := "root:123456@tcp(localhost)/student"
+	dsn := "root:123456@tcp(localhost)/test"
 	if _, err := OpenDB("mysql", dsn); err != nil {
 		t.Fatal()
 	}
