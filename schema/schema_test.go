@@ -31,7 +31,7 @@ var mysql, _ = dialect.GetDialect("mysql")
 
 func TestParse(t *testing.T) {
 	t.Run("normal struct", func(t *testing.T) {
-		schema := Parse(&Student{}, mysql)
+		schema := Parse(&Student{any: ""}, mysql)
 		if schema.Name != "Student" || len(schema.Fields) != 3 {
 			t.Fatal("failed to parse Student struct")
 		}

@@ -2,7 +2,6 @@ package miniorm
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"miniorm/dialect"
 
@@ -29,7 +28,7 @@ func Open(drive, dsn string) (*DB, error) {
 
 	d, ok := dialect.GetDialect(drive)
 	if !ok {
-		err := errors.New(fmt.Sprintf("dialect %s Not Found", drive))
+		err := fmt.Errorf("dialect %s Not Found", drive)
 		log.Error(err)
 		return nil, err
 	}

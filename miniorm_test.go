@@ -16,7 +16,6 @@ type Student struct {
 	Id   uint `miniorm:"PRIMARY KEY"`
 	Name string
 	Age  int
-	any  string
 }
 
 func TestOpen(t *testing.T) {
