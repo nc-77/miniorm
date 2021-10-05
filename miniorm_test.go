@@ -12,7 +12,7 @@ var (
 	db  *DB
 )
 
-type Student struct {
+type User struct {
 	Id   uint `miniorm:"PRIMARY KEY"`
 	Name string
 	Age  int
@@ -32,13 +32,13 @@ func TestMain(m *testing.M) {
 }
 
 func TestDB_Table(t *testing.T) {
-	if err := db.Model(&Student{}).CreateTable().Error(); err != nil {
+	if err := db.Model(&User{}).CreateTable().Error(); err != nil {
 		t.Fatal(err)
 	}
-	if exist := db.Model(&Student{}).HasTable(); !exist {
+	if exist := db.Model(&User{}).HasTable(); !exist {
 		t.Fatal("hasTable failed,excepted true,got false")
 	}
-	if err := db.Model(&Student{}).DropTable().Error(); err != nil {
+	if err := db.Model(&User{}).DropTable().Error(); err != nil {
 		t.Fatal(err)
 	}
 }
