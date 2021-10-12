@@ -26,19 +26,25 @@ func TestOpen(t *testing.T) {
 
 func TestMain(m *testing.M) {
 	db, _ = Open("mysql", dsn)
+
 	// run tests
 	code := m.Run()
+
 	os.Exit(code)
 }
 
 func TestDB_Table(t *testing.T) {
-	if err := db.Model(&User{}).CreateTable().Error(); err != nil {
-		t.Fatal(err)
+	if result := db.CreateTable(User{}); result.Error != nil {
+		t.Fatal(result.Error)
 	}
-	if exist := db.Model(&User{}).HasTable(); !exist {
+	if exist := db.HasTable(&User{}); !exist {
 		t.Fatal("hasTable failed,excepted true,got false")
 	}
-	if err := db.Model(&User{}).DropTable().Error(); err != nil {
-		t.Fatal(err)
+	if result := db.DropTable(&User{}); result.Error != nil {
+		t.Fatal(result.Error)
 	}
+}
+
+func TestDB_Find(t *testing.T) {
+
 }

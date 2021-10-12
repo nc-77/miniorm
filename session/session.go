@@ -3,6 +3,7 @@ package session
 import (
 	"database/sql"
 	"fmt"
+	"miniorm/clause"
 	"miniorm/dialect"
 	"miniorm/log"
 	"miniorm/schema"
@@ -15,8 +16,14 @@ type Session struct {
 	sql      strings.Builder
 	sqlArgs  []interface{}
 	dialect  dialect.Dialect // set when init
-	refTable *schema.Schema  // set when model called
-	err      error           // set when exec,query,queryRow go wrong
+	refTable *schema.Schema  // set when model is called
+	clause   *clause.Clause  // combines the clauses into a complete sql and sqlArgs
+	result   *Result         // set when exec,query,queryRow are called
+}
+
+type Result struct {
+	Error        error
+	RowsAffected int64
 }
 
 func NewSession(db *sql.DB, dialect dialect.Dialect) *Session {
@@ -24,6 +31,8 @@ func NewSession(db *sql.DB, dialect dialect.Dialect) *Session {
 		db:      db,
 		sqlArgs: make([]interface{}, 0),
 		dialect: dialect,
+		clause:  new(clause.Clause),
+		result:  new(Result),
 	}
 }
 
@@ -41,9 +50,31 @@ func (s *Session) toSql() (sql string) {
 }
 
 func (s *Session) clear() {
-	s.err = nil
 	s.sql.Reset()
 	s.sqlArgs = make([]interface{}, 0)
+}
+
+func (s *Session) Result() *Result {
+	return s.result
+}
+
+// last set session's result after crud records
+func (s *Session) recordLast(affected int64, err error) {
+	s.result = &Result{
+		Error:        err,
+		RowsAffected: affected,
+	}
+	if err == nil && affected == 0 {
+		s.result.Error = ErrRecordNotFound
+	}
+}
+
+// last set session's result after crud table
+func (s *Session) tableLast(affected int64, err error) {
+	s.result = &Result{
+		Error:        err,
+		RowsAffected: affected,
+	}
 }
 
 func (s *Session) Raw(sql string, args ...interface{}) *Session {
@@ -55,20 +86,22 @@ func (s *Session) Raw(sql string, args ...interface{}) *Session {
 func (s *Session) Exec() (result sql.Result, err error) {
 	defer s.clear()
 	log.Info(s.toSql())
-	if result, err = s.db.Exec(s.sql.String(), s.sqlArgs...); err != nil {
-		s.err = err
+	result, err = s.db.Exec(s.sql.String(), s.sqlArgs...)
+	if err != nil {
 		log.Error(err)
 	}
+
 	return
 }
 
 func (s *Session) Query() (rows *sql.Rows, err error) {
 	defer s.clear()
 	log.Info(s.toSql())
-	if rows, err = s.db.Query(s.sql.String(), s.sqlArgs...); err != nil {
-		s.err = err
+	rows, err = s.db.Query(s.sql.String(), s.sqlArgs...)
+	if err != nil {
 		log.Error(err)
 	}
+
 	return
 }
 
@@ -76,7 +109,7 @@ func (s *Session) QueryRow() (row *sql.Row) {
 	defer s.clear()
 	log.Info(s.toSql())
 	row = s.db.QueryRow(s.sql.String(), s.sqlArgs...)
-	s.err = row.Err()
+
 	return
 }
 
@@ -95,8 +128,4 @@ func (s *Session) RefTable() *schema.Schema {
 		log.Error("model is not set")
 	}
 	return s.refTable
-}
-
-func (s *Session) Err() error {
-	return s.err
 }

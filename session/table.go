@@ -5,7 +5,11 @@ import (
 	"strings"
 )
 
-func (s *Session) CreateTable() error {
+func (s *Session) CreateTable() (err error) {
+	defer func() {
+		s.tableLast(0, err)
+	}()
+
 	table := s.RefTable()
 	fields := make([]string, 0)
 	for _, field := range table.Fields {
@@ -13,14 +17,19 @@ func (s *Session) CreateTable() error {
 	}
 
 	args := strings.Join(fields, ",")
-	_, err := s.Raw(fmt.Sprintf("CREATE TABLE `%s` (%s)", table.Name, args)).Exec()
+	_, err = s.Raw(fmt.Sprintf("CREATE TABLE `%s` (%s)", table.Name, args)).Exec()
 
-	return err
+	return
 }
 
-func (s *Session) DropTable() error {
-	_, err := s.Raw(fmt.Sprintf("DROP TABLE IF EXISTS `%s`", s.RefTable().Name)).Exec()
-	return err
+func (s *Session) DropTable() (err error) {
+	defer func() {
+		s.tableLast(0, err)
+	}()
+
+	_, err = s.Raw(fmt.Sprintf("DROP TABLE IF EXISTS `%s`", s.RefTable().Name)).Exec()
+
+	return
 }
 
 func (s *Session) HasTable() bool {

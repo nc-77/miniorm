@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	infoLog  = log.New(os.Stdout, "\033[34m[info]\033[0m ", log.Lshortfile|log.LstdFlags)
-	errorLog = log.New(os.Stdout, "\033[31m[error]\033[0m ", log.Lshortfile|log.LstdFlags)
+	infoLog  = log.New(os.Stdout, "\033[34m[info]\033[0m ", log.LstdFlags)
+	errorLog = log.New(os.Stdout, "\033[31m[error]\033[0m ", log.LstdFlags)
 )
 
 var (

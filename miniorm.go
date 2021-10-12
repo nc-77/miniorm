@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"miniorm/dialect"
+	"reflect"
 
 	"miniorm/log"
 	"miniorm/session"
@@ -40,30 +41,32 @@ func Open(drive, dsn string) (*DB, error) {
 	return retDB, nil
 }
 
-// Error return db error
-func (db *DB) Error() error {
-	return db.session.Err()
-}
-
 // Model specify the model you would like to run db operations
 func (db *DB) Model(value interface{}) *DB {
 	_ = db.session.Model(value)
 	return db
 }
 
-// HasTable create db table based on Model
-func (db *DB) HasTable() bool {
-	return db.session.HasTable()
+// HasTable create db table based on Value struct
+func (db *DB) HasTable(value interface{}) bool {
+	return db.session.Model(value).HasTable()
 }
 
-// CreateTable create db table based on Model
-func (db *DB) CreateTable() *DB {
-	_ = db.session.CreateTable()
-	return db
+// CreateTable create db table based on Value struct
+func (db *DB) CreateTable(value interface{}) *session.Result {
+	_ = db.session.Model(value).CreateTable()
+	return db.session.Result()
 }
 
-// DropTable drop db table based on Model
-func (db *DB) DropTable() *DB {
-	_ = db.session.DropTable()
-	return db
+// DropTable drop db table based on Value struct
+func (db *DB) DropTable(value interface{}) *session.Result {
+	_ = db.session.Model(value).DropTable()
+	return db.session.Result()
+}
+
+// Find find records based on values
+func (db *DB) Find(values interface{}) *session.Result {
+	model := reflect.ValueOf(values).Elem()
+	_ = db.session.Model(model).FindRecords(values)
+	return db.session.Result()
 }
