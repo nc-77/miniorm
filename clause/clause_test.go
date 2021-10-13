@@ -35,12 +35,18 @@ func TestClause(t *testing.T) {
 		c.Set(ORDERBY, "id", "DESC")
 		c.Set(LIMIT, 1)
 		sql, sqlArgs := c.Build(SELECT, WHERE, ORDERBY, LIMIT)
-		sqlExcepted := "SELECT (id,name,age) FROM `User` WHERE name = ? and age > ? ORDER BY id DESC LIMIT ?"
+		sqlExcepted := "SELECT id,name,age FROM `User` WHERE name = ? and age > ? ORDER BY id DESC LIMIT ?"
 		sqlArgsExcepted := []interface{}{"nic", 18, 1}
 		assert(sql, sqlArgs, sqlExcepted, sqlArgsExcepted)
 	})
 
-	//t.Run("INSERT_0", func(t *testing.T) {
-	//	c.Set(INSERT,"User",[]string{})
-	//})
+	t.Run("INSERT_0", func(t *testing.T) {
+		c.Set(INSERT, "User", []string{"id", "name", "age"})
+		c.Set(VALUES, []interface{}{10, "nc-77", 22}, []interface{}{11, "nc", 23})
+		sql, sqlArgs := c.Build(INSERT, VALUES)
+
+		sqlExcepted := "INSERT INTO `User` (id,name,age) VALUES (?,?,?),(?,?,?)"
+		sqlArgsExcepted := []interface{}{10, "nc-77", 22, 11, "nc", 23}
+		assert(sql, sqlArgs, sqlExcepted, sqlArgsExcepted)
+	})
 }

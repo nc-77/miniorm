@@ -66,7 +66,17 @@ func (db *DB) DropTable(value interface{}) *session.Result {
 
 // Find find records based on values
 func (db *DB) Find(values interface{}) *session.Result {
-	model := reflect.ValueOf(values).Elem()
+	destType := reflect.Indirect(reflect.ValueOf(values)).Type().Elem()
+	model := reflect.New(destType).Interface()
 	_ = db.session.Model(model).FindRecords(values)
+	return db.session.Result()
+}
+
+// Create insert records based on values
+func (db *DB) Create(values ...interface{}) *session.Result {
+	if len(values) == 0 {
+		panic("should pass at least one argument to db.create")
+	}
+	_ = db.session.Model(values[0]).CreateRecords(values...)
 	return db.session.Result()
 }

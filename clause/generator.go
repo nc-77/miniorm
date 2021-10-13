@@ -19,7 +19,7 @@ func init() {
 
 }
 
-// SELECT ($fields) FROM $tableName
+// SELECT $fields FROM $tableName
 func _select(values ...interface{}) (sql string, sqlArgs []interface{}) {
 	tableName := values[0]
 	fields := values[1].([]string)
@@ -28,7 +28,7 @@ func _select(values ...interface{}) (sql string, sqlArgs []interface{}) {
 		sql = fmt.Sprintf("SELECT * FROM `%v`", tableName)
 	} else {
 		fields := strings.Join(values[1].([]string), ",")
-		sql = fmt.Sprintf("SELECT (%s) FROM `%v`", fields, tableName)
+		sql = fmt.Sprintf("SELECT %v FROM `%v`", fields, tableName)
 	}
 
 	return
@@ -52,16 +52,24 @@ func _where(values ...interface{}) (sql string, sqlArgs []interface{}) {
 	return
 }
 
-// VALUES (?,?,?...)	args
+// VALUES (?,?,?...),(?,?,?...),(?,?,?...)	args
 func _values(values ...interface{}) (sql string, sqlArgs []interface{}) {
-	n := len(values)
-	elems := make([]string, n)
-	for i := range elems {
-		elems[i] = "?"
+	var sqlBuilder strings.Builder
+	sqlBuilder.WriteString("VALUES ")
+	descs := make([]string, 0)
+	for _, value := range values {
+		v := value.([]interface{})
+		n := len(v)
+		elems := make([]string, n)
+		for i := range elems {
+			elems[i] = "?"
+		}
+		desc := strings.Join(elems, ",")
+		descs = append(descs, fmt.Sprintf("(%v)", desc))
+		sqlArgs = append(sqlArgs, v...)
 	}
-	desc := strings.Join(elems, ",")
-	sql = fmt.Sprintf("VALUES (%s)", desc)
-	sqlArgs = values
+	sqlBuilder.WriteString(strings.Join(descs, ","))
+	sql = sqlBuilder.String()
 
 	return
 }

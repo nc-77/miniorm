@@ -14,10 +14,11 @@ type Field struct {
 }
 
 type Schema struct {
-	Model    interface{}
-	Name     string
-	Fields   []*Field
-	fieldMap map[string]*Field
+	Model      interface{}
+	Name       string
+	Fields     []*Field
+	FieldsName []string
+	FieldsMap  map[string]*Field
 }
 
 // Parse parses any struct to schema
@@ -25,10 +26,11 @@ func Parse(v interface{}, d dialect.Dialect) (s *Schema) {
 	model := reflect.Indirect(reflect.ValueOf(v)).Type()
 
 	s = &Schema{
-		Model:    v,
-		Name:     model.Name(),
-		Fields:   make([]*Field, 0),
-		fieldMap: make(map[string]*Field),
+		Model:      v,
+		Name:       model.Name(),
+		Fields:     make([]*Field, 0),
+		FieldsName: make([]string, 0),
+		FieldsMap:  make(map[string]*Field),
 	}
 
 	var parseField func(reflect.StructField)
@@ -42,11 +44,12 @@ func Parse(v interface{}, d dialect.Dialect) (s *Schema) {
 				if tag, ok := p.Tag.Lookup("miniorm"); ok {
 					field.Tag = tag
 				}
-				if _, ok := s.fieldMap[field.Name]; ok {
+				if _, ok := s.FieldsMap[field.Name]; ok {
 					panic(fmt.Sprintf("%s field is repeated in the same structure.\n", field.Name))
 				}
 				s.Fields = append(s.Fields, field)
-				s.fieldMap[field.Name] = field
+				s.FieldsName = append(s.FieldsName, field.Name)
+				s.FieldsMap[field.Name] = field
 			} else {
 				model := p.Type
 				for i := 0; i < model.NumField(); i++ {
@@ -64,6 +67,6 @@ func Parse(v interface{}, d dialect.Dialect) (s *Schema) {
 }
 
 func (s *Schema) GetField(name string) (field *Field, ok bool) {
-	field, ok = s.fieldMap[name]
+	field, ok = s.FieldsMap[name]
 	return
 }

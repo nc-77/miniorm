@@ -47,7 +47,10 @@ func TestSession_Exec(t *testing.T) {
 	if _, err := s.Raw("DELETE FROM `Student` WHERE Name = ?", "nic").Exec(); err != nil {
 		t.Fatal()
 	}
-	if _, err := s.Raw("INSERT INTO `Student` VALUES(?,?,?)", 100, "nic", 24).Exec(); err != nil {
+	if _, err := s.Raw("INSERT INTO `Student` (Id,Name,Age) VALUES(?,?,?)", 100, "nic", 24).Exec(); err != nil {
+		t.Fatal()
+	}
+	if _, err := s.Raw("INSERT INTO `Student` (Id,Name,Age) VALUES (?,?,?),(?,?,?)", 100, "nic", 24, 101, "nc-77", 25).Exec(); err != nil {
 		t.Fatal()
 	}
 }
