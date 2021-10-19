@@ -5,6 +5,12 @@ import (
 	"testing"
 )
 
+type User struct {
+	Id   int
+	Name string
+	Age  int
+}
+
 func TestClause(t *testing.T) {
 	var c Clause
 	assert := func(sql string, sqlArgs []interface{}, sqlExcepted string, sqlArgsExcepted []interface{}) {
@@ -47,6 +53,28 @@ func TestClause(t *testing.T) {
 
 		sqlExcepted := "INSERT INTO `User` (id,name,age) VALUES (?,?,?),(?,?,?)"
 		sqlArgsExcepted := []interface{}{10, "nc-77", 22, 11, "nc", 23}
+		assert(sql, sqlArgs, sqlExcepted, sqlArgsExcepted)
+	})
+
+	t.Run("UPDATE_ByMap", func(t *testing.T) {
+		c.Set(UPDATE, "User", map[string]interface{}{"name": "newName", "age": 20})
+		sql, sqlArgs := c.Build(UPDATE)
+
+		sqlExcepted := "UPDATE `User` SET name = ?,age = ?"
+		sqlArgsExcepted := []interface{}{"newName", 20}
+		assert(sql, sqlArgs, sqlExcepted, sqlArgsExcepted)
+	})
+	t.Run("UPDATE_ByStruct", func(t *testing.T) {
+
+		c.Set(UPDATE, "User", User{
+			Id:   1,
+			Name: "newName",
+			Age:  18,
+		})
+		sql, sqlArgs := c.Build(UPDATE)
+
+		sqlExcepted := "UPDATE `User` SET Id = ?,Name = ?,Age = ?"
+		sqlArgsExcepted := []interface{}{1, "newName", 18}
 		assert(sql, sqlArgs, sqlExcepted, sqlArgsExcepted)
 	})
 }

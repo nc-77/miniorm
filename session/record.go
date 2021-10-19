@@ -5,6 +5,7 @@ import (
 	"errors"
 	"miniorm/clause"
 	"reflect"
+	"strings"
 )
 
 var (
@@ -25,7 +26,7 @@ func (s *Session) FindRecords(values interface{}) (err error) {
 	// build sql and sqlArgs based on refTable
 	table := s.RefTable()
 	s.clause.Set(clause.SELECT, table.Name, table.FieldsName)
-	sqls, sqlArgs := s.clause.Build(clause.SELECT)
+	sqls, sqlArgs := s.clause.Build(clause.SELECT, clause.WHERE, clause.ORDERBY, clause.LIMIT)
 
 	// query rows and map rows to values
 	var rows *sql.Rows
@@ -55,10 +56,20 @@ func (s *Session) FindRecords(values interface{}) (err error) {
 
 // FirstRecord assign the first record to value
 func (s *Session) FirstRecord(value interface{}) (err error) {
-	return err
+	s.clause.Set(clause.LIMIT, 1)
+
+	dest := reflect.Indirect(reflect.ValueOf(value))
+	destSlice := reflect.New(reflect.SliceOf(dest.Type())).Elem()
+	if err = s.FindRecords(destSlice.Addr().Interface()); err != nil {
+		return
+	}
+	if destSlice.Len() > 0 {
+		dest.Set(destSlice.Index(0))
+	}
+	return
 }
 
-// CreateRecord insert the values into database by parsing value
+// CreateRecord insert records into database by parsing value
 func (s *Session) CreateRecords(values ...interface{}) (err error) {
 	var result sql.Result
 	defer func() {
@@ -88,4 +99,88 @@ func (s *Session) CreateRecords(values ...interface{}) (err error) {
 	result, err = s.Raw(sqls, sqlArgs...).Exec()
 
 	return
+}
+
+// DeleteRecords delete records from database by setting where
+func (s *Session) DeleteRecords() (err error) {
+	var result sql.Result
+	defer func() {
+		var affected int64
+		if result != nil {
+			affected, _ = result.RowsAffected()
+		}
+		s.recordLast(affected, err)
+	}()
+
+	table := s.RefTable()
+	s.clause.Set(clause.DELETE, table.Name)
+	sqls, sqlArgs := s.clause.Build(clause.DELETE, clause.WHERE)
+
+	result, err = s.Raw(sqls, sqlArgs...).Exec()
+
+	return
+}
+
+// UpdateRecords update all fields even if the field is zero
+func (s *Session) UpdateRecords(values ...interface{}) (err error) {
+	var result sql.Result
+	defer func() {
+		var affected int64
+		if result != nil {
+			affected, _ = result.RowsAffected()
+		}
+		s.recordLast(affected, err)
+	}()
+
+	table := s.RefTable()
+	pks := make([]string, len(table.PrimaryKey))
+	for i := range pks {
+		pks[i] = table.PrimaryKey[i] + " = ?"
+	}
+
+	for _, value := range values {
+		pkValues := make([]interface{}, len(table.PrimaryKey))
+		v := reflect.Indirect(reflect.ValueOf(value))
+		switch v.Kind() {
+		case reflect.Struct: // 传入结构体时根据结构体中主键设置where 主键
+			{
+				for i := range pkValues {
+					pk := table.PrimaryKey[i]
+					pkValues[i] = v.FieldByName(pk).Interface()
+				}
+				s.clause.Set(clause.UPDATE, table.Name, value)
+			}
+		case reflect.Map: // 传入map时根据之前的model设置where 主键
+			{
+				for i := range pkValues {
+					pk := table.PrimaryKey[i]
+					pkValues[i] = reflect.Indirect(reflect.ValueOf(table.Model)).FieldByName(pk).Interface()
+				}
+				s.clause.Set(clause.UPDATE, table.Name, value)
+			}
+		}
+		// 用户未指定where时默认设置主键
+		if !s.clause.Exist(clause.WHERE) {
+			s.clause.Set(clause.WHERE, append(append([]interface{}{}, strings.Join(pks, "and")), pkValues...)...)
+		}
+		sqls, sqlArgs := s.clause.Build(clause.UPDATE, clause.WHERE)
+		result, err = s.Raw(sqls, sqlArgs...).Exec()
+	}
+
+	return
+}
+
+func (s *Session) Where(values ...interface{}) *Session {
+	s.clause.Set(clause.WHERE, values...)
+	return s
+}
+
+func (s *Session) Limit(values ...interface{}) *Session {
+	s.clause.Set(clause.LIMIT, values...)
+	return s
+}
+
+func (s *Session) OrderBy(values ...interface{}) *Session {
+	s.clause.Set(clause.ORDERBY, values...)
+	return s
 }

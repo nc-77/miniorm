@@ -49,3 +49,8 @@ func (c *Clause) Build(orders ...Type) (sql string, sqlArgs []interface{}) {
 
 	return
 }
+
+func (c *Clause) Exist(p Type) bool {
+	_, ok := c.sql[p]
+	return ok
+}

@@ -37,3 +37,36 @@ func TestSession_CreateRecord(t *testing.T) {
 		t.Fatalf("find all records failed,excepted %v,got %v", 5, s.Result().RowsAffected)
 	}
 }
+
+func TestSession_DeleteRecords(t *testing.T) {
+	if err := s.Model(Student{}).Where("Name = ?", "nic").DeleteRecords(); err != nil {
+		t.Fatal(err)
+	}
+	if s.Result().RowsAffected != 1 {
+		t.Fatalf("rowsAffected failed,excepted %v,got %v", 1, s.Result().RowsAffected)
+	}
+}
+
+func TestSession_FirstRecord(t *testing.T) {
+	var stu Student
+	if err := s.Model(Student{}).FirstRecord(&stu); err != nil {
+		t.Fatal(err)
+	}
+	if s.Result().RowsAffected != 1 {
+		t.Fatalf("rowsAffected failed,excepted %v,got %v", 1, s.Result().RowsAffected)
+	}
+
+}
+
+func TestSession_UpdateRecords(t *testing.T) {
+	stu1 := Student{Id: 1, Name: "nic", Age: 19}
+	stu2 := Student{Id: 2, Name: "nc", Age: 18}
+
+	if err := s.Model(Student{}).UpdateRecords(&stu1, &stu2); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Model(&stu1).UpdateRecords(map[string]interface{}{"Age": stu1.Age + 1}); err != nil {
+		t.Fatal(err)
+	}
+	t.Log(stu1)
+}

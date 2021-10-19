@@ -16,6 +16,7 @@ type Field struct {
 type Schema struct {
 	Model      interface{}
 	Name       string
+	PrimaryKey []string
 	Fields     []*Field
 	FieldsName []string
 	FieldsMap  map[string]*Field
@@ -28,6 +29,7 @@ func Parse(v interface{}, d dialect.Dialect) (s *Schema) {
 	s = &Schema{
 		Model:      v,
 		Name:       model.Name(),
+		PrimaryKey: make([]string, 0),
 		Fields:     make([]*Field, 0),
 		FieldsName: make([]string, 0),
 		FieldsMap:  make(map[string]*Field),
@@ -43,6 +45,9 @@ func Parse(v interface{}, d dialect.Dialect) (s *Schema) {
 				}
 				if tag, ok := p.Tag.Lookup("miniorm"); ok {
 					field.Tag = tag
+					if tag == "PRIMARY KEY" {
+						s.PrimaryKey = append(s.PrimaryKey, field.Name)
+					}
 				}
 				if _, ok := s.FieldsMap[field.Name]; ok {
 					panic(fmt.Sprintf("%s field is repeated in the same structure.\n", field.Name))

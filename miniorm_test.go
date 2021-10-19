@@ -70,5 +70,29 @@ func TestDB_Record(t *testing.T) {
 		t.Log(users)
 		t.Fatal("find records failed")
 	}
-
+	// find first record
+	var firstUser User
+	if result = db.OrderBy("Id", "DESC").First(&firstUser); result.Error != nil {
+		t.Fatal(result.Error)
+	}
+	if firstUser != *user1 {
+		t.Log(firstUser)
+		t.Fatal("find first record failed")
+	}
+	// update records
+	user0.Age++
+	user1.Age++
+	if result = db.Update(user0, user1); result.Error != nil {
+		t.Fatal(result.Error)
+	}
+	if result = db.Model(user1).Update(map[string]interface{}{"Age": user1.Age + 1}); result.Error != nil {
+		t.Fatal(result.Error)
+	}
+	if result = db.Model(&User{}).Where("Name = ?", "nc-77").Update(map[string]interface{}{"Age": 23}); result.Error != nil {
+		t.Fatal(result.Error)
+	}
+	// delete records
+	if result = db.Model(&User{}).Where("Name = ? and Age = ?", "nc-77", 23).Delete(); result.Error != nil {
+		t.Fatal(result.Error)
+	}
 }

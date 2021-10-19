@@ -27,7 +27,7 @@ func newSession() *Session {
 func TestMain(m *testing.M) {
 	s = newSession()
 	// create student table ans insert some rows for testing
-	_, _ = s.db.Exec("CREATE  TABLE Student(Id int,Name text,Age text)")
+	_, _ = s.db.Exec("CREATE  TABLE Student(Id int,Name text,Age int)")
 	_, _ = s.db.Query("INSERT INTO `Student` VALUES(1,'nic',18)")
 	_, _ = s.db.Query("INSERT INTO `Student` VALUES(2,'zhangSan',18)")
 	_, _ = s.db.Query("INSERT INTO `Student` VALUES(3,'LiSi',19)")

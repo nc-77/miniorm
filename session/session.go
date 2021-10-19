@@ -50,6 +50,7 @@ func (s *Session) toSql() (sql string) {
 }
 
 func (s *Session) clear() {
+	s.clause.Clear()
 	s.sql.Reset()
 	s.sqlArgs = make([]interface{}, 0)
 }
@@ -119,6 +120,7 @@ func (s *Session) Model(v interface{}) *Session {
 	if s.refTable == nil || reflect.TypeOf(v) != reflect.TypeOf(s.refTable.Model) {
 		s.refTable = schema.Parse(v, s.dialect)
 	}
+	s.refTable.Model = v
 	return s
 }
 
