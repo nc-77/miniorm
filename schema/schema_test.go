@@ -1,8 +1,9 @@
 package schema
 
 import (
-	"miniorm/dialect"
 	"testing"
+
+	"github.com/nc-77/miniorm/dialect"
 )
 
 type (

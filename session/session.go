@@ -3,12 +3,13 @@ package session
 import (
 	"database/sql"
 	"fmt"
-	"miniorm/clause"
-	"miniorm/dialect"
-	"miniorm/log"
-	"miniorm/schema"
 	"reflect"
 	"strings"
+
+	"github.com/nc-77/miniorm/clause"
+	"github.com/nc-77/miniorm/dialect"
+	"github.com/nc-77/miniorm/log"
+	"github.com/nc-77/miniorm/schema"
 )
 
 type Session struct {

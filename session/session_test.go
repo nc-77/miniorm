@@ -2,11 +2,11 @@ package session
 
 import (
 	"database/sql"
-	"miniorm/dialect"
 	"os"
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/nc-77/miniorm/dialect"
 )
 
 var (

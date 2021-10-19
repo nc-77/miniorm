@@ -1,5 +1,5 @@
-module miniorm
+module github.com/nc-77/miniorm
 
 go 1.16
 
-require github.com/go-sql-driver/mysql v1.6.0 // indirect
+require github.com/go-sql-driver/mysql v1.6.0

@@ -3,9 +3,10 @@ package session
 import (
 	"database/sql"
 	"errors"
-	"miniorm/clause"
 	"reflect"
 	"strings"
+
+	"github.com/nc-77/miniorm/clause"
 )
 
 var (

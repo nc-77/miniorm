@@ -3,11 +3,11 @@ package miniorm
 import (
 	"database/sql"
 	"fmt"
-	"miniorm/dialect"
 	"reflect"
 
-	"miniorm/log"
-	"miniorm/session"
+	"github.com/nc-77/miniorm/dialect"
+	"github.com/nc-77/miniorm/log"
+	"github.com/nc-77/miniorm/session"
 )
 
 type DB struct {

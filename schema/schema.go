@@ -3,8 +3,9 @@ package schema
 import (
 	"fmt"
 	"go/ast"
-	"miniorm/dialect"
 	"reflect"
+
+	"github.com/nc-77/miniorm/dialect"
 )
 
 type Field struct {
