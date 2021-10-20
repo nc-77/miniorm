@@ -1,29 +1,29 @@
 # miniorm
 
-English | [中文](https://github.com/nc-77/miniorm/blob/main/README-zh.md)
+[English](https://github.com/nc-77/miniorm/blob/main/README.md) | 中文
 
-miniorm is a lightful and fast orm framework.The API mainly refers to Gorm and Xorm, and the purpose is to provide users with a more easy and free framework.
+miniorm 是一个轻量级，快速的orm框架。框架提供接口主要参考了GROM 以及 XORM ，旨在为用户提供一个易上手，更自由的框架。
 
-This project began as a way to learn Golang. **Don't use in any production environment**.
+该项目主要是为了Go语言熟悉以及进阶，**请勿用于生产环境**。
 
-## Features
+## 特征
 
-- Easy API supported
-- More free SQL API supported
-- Support for chain calls
-- Table CRUD and primary key settings
-- Record CRUD
+- 简洁，直观的API提供
+- 更加自由，用户可控度更高的SQL接口提供
+- 支持链式调用
+- 表的创建，删除以及主键的设置
+- 记录的增删更查
 - ...
 
-## Usage
+## 使用
 
-Import miniorm in the applicaton
+在项目中导入miniorm模块
 
 ```go
 go get -u github.com/nc-77/miniorm
 ```
 
-## QuickStart
+## 快速开始
 
 ```go
 package main
@@ -66,16 +66,18 @@ func main(){
 }
 ```
 
-Please see [example.go](https://github.com/nc-77/miniorm/blob/main/_example/example.go) for more imformation
+更多示范请查看 [example.go](https://github.com/nc-77/miniorm/blob/main/_example/example.go) 
 
-## Todo
+## 代办事项
 
-- Transaction
-- Hook
-- More API supported
-- More Database supported
-- More complete documentation and notes
+- 支持事务
+- 支持钩子
+- 更多的API提供
+- 更多的数据库支持
+- 完善相关文档以及注释
+- ...
 
-## Thanks
+## 感谢
 
-- [GeeORM](https://geektutu.com/post/geeorm.html)
+- [GeeORM教程](https://geektutu.com/post/geeorm.html)
+

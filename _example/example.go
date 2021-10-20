@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"miniorm"
+	"github.com/nc-77/miniorm"
 
 	_ "github.com/go-sql-driver/mysql" // important!
 )
