@@ -57,6 +57,8 @@ func (s *Session) FindRecords(values interface{}) (err error) {
 
 // FirstRecord assign the first record to value
 func (s *Session) FirstRecord(value interface{}) (err error) {
+	s.CallMethod(BeforeFirst)
+
 	s.clause.Set(clause.LIMIT, 1)
 
 	dest := reflect.Indirect(reflect.ValueOf(value))
@@ -67,6 +69,8 @@ func (s *Session) FirstRecord(value interface{}) (err error) {
 	if destSlice.Len() > 0 {
 		dest.Set(destSlice.Index(0))
 	}
+
+	s.CallMethod(AfterFirst)
 	return
 }
 
@@ -80,6 +84,8 @@ func (s *Session) CreateRecords(values ...interface{}) (err error) {
 		}
 		s.recordLast(affected, err)
 	}()
+	// beforeInsert hook
+	s.CallMethod(BeforeInsert)
 
 	table := s.RefTable()
 	recordsValues := make([]interface{}, len(values))
@@ -99,6 +105,9 @@ func (s *Session) CreateRecords(values ...interface{}) (err error) {
 
 	result, err = s.Raw(sqls, sqlArgs...).Exec()
 
+	// afterInsert hook
+	s.CallMethod(AfterInsert)
+
 	return
 }
 
@@ -112,12 +121,17 @@ func (s *Session) DeleteRecords() (err error) {
 		}
 		s.recordLast(affected, err)
 	}()
+	// beforeDelete hook
+	s.CallMethod(BeforeDelete)
 
 	table := s.RefTable()
 	s.clause.Set(clause.DELETE, table.Name)
 	sqls, sqlArgs := s.clause.Build(clause.DELETE, clause.WHERE)
 
 	result, err = s.Raw(sqls, sqlArgs...).Exec()
+
+	// afterDelete hook
+	s.CallMethod(AfterDelete)
 
 	return
 }
@@ -132,6 +146,8 @@ func (s *Session) UpdateRecords(values ...interface{}) (err error) {
 		}
 		s.recordLast(affected, err)
 	}()
+	// beforeUpdate hook
+	//s.CallMethod(BeforeUpdate)
 
 	table := s.RefTable()
 	pks := make([]string, len(table.PrimaryKey))
@@ -167,6 +183,8 @@ func (s *Session) UpdateRecords(values ...interface{}) (err error) {
 		sqls, sqlArgs := s.clause.Build(clause.UPDATE, clause.WHERE)
 		result, err = s.Raw(sqls, sqlArgs...).Exec()
 	}
+	// afterUpdate hook
+	//s.CallMethod(AfterUpdate)
 
 	return
 }

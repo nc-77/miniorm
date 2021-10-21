@@ -45,6 +45,7 @@ func TestSession_DeleteRecords(t *testing.T) {
 	if s.Result().RowsAffected != 1 {
 		t.Fatalf("rowsAffected failed,excepted %v,got %v", 1, s.Result().RowsAffected)
 	}
+
 }
 
 func TestSession_FirstRecord(t *testing.T) {

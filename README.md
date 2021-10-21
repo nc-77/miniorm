@@ -1,18 +1,19 @@
-# miniorm
+# miniorm[![Go Reference](https://pkg.go.dev/badge/github.com/nc-77/miniorm.svg)](https://pkg.go.dev/github.com/nc-77/miniorm)![example workflow](https://github.com/nc-77/miniorm/actions/workflows/go.yml/badge.svg)
 
 English | [中文](https://github.com/nc-77/miniorm/blob/main/README-zh.md)
 
-miniorm is a lightful and fast orm framework.The API mainly refers to Gorm and Xorm, and the purpose is to provide users with a more easy and free framework.
+Miniorm is a lightful and fast orm framework.The API mainly refers to Gorm and Xorm, and the purpose is to provide users with a more easy and free framework.
 
 This project began as a way to learn Golang. **Don't use in any production environment**.
 
 ## Features
 
 - Easy API supported
-- More free SQL API supported
-- Support for chain calls
+- More freedom SQL API supported
 - Table CRUD and primary key settings
 - Record CRUD
+- Support for chain calls
+- Hooks
 - ...
 
 ## Usage
@@ -71,7 +72,6 @@ Please see [example.go](https://github.com/nc-77/miniorm/blob/main/_example/exam
 ## Todo
 
 - Transaction
-- Hook
 - More API supported
 - More Database supported
 - More complete documentation and notes

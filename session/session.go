@@ -119,7 +119,7 @@ func (s *Session) QueryRow() (row *sql.Row) {
 func (s *Session) Model(v interface{}) *Session {
 	// 当前refTable为空或与指定新refTable时更新
 	if s.refTable == nil || reflect.TypeOf(v) != reflect.TypeOf(s.refTable.Model) {
-		s.refTable = schema.Parse(v, s.dialect)
+		s.refTable = schema.Parse(getElem(v), s.dialect)
 	}
 	s.refTable.Model = v
 	return s
@@ -131,4 +131,14 @@ func (s *Session) RefTable() *schema.Schema {
 		log.Error("model is not set")
 	}
 	return s.refTable
+}
+
+// if value's kind is slice return value[0], else return value
+func getElem(value interface{}) interface{} {
+	v := reflect.Indirect(reflect.ValueOf(value))
+	switch v.Kind() {
+	case reflect.Slice:
+		return v.Index(0).Interface()
+	}
+	return v.Interface()
 }

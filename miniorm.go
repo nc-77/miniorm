@@ -83,7 +83,7 @@ func (db *DB) Create(values ...interface{}) *session.Result {
 	if len(values) == 0 {
 		panic("should pass at least one argument to db.Create")
 	}
-	_ = db.session.Model(values[0]).CreateRecords(values...)
+	_ = db.session.Model(values).CreateRecords(values...)
 	return db.session.Result()
 }
 

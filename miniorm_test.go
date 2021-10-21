@@ -18,6 +18,32 @@ type User struct {
 	Age  int
 }
 
+type UserWithHocks struct {
+	User
+	Password           string
+	BfDelete, AtDelete bool
+}
+
+func (u *UserWithHocks) AfterFirst() error {
+	u.Password = "******"
+	return nil
+}
+
+func (u *UserWithHocks) BeforeInsert() error {
+	u.Id += 1000
+	return nil
+}
+
+func (u *UserWithHocks) BeforeDelete() error {
+	u.BfDelete = true
+	return nil
+}
+
+func (u *UserWithHocks) AfterDelete() error {
+	u.AtDelete = true
+	return nil
+}
+
 func TestOpen(t *testing.T) {
 	if _, err := Open("mysql", dsn); err != nil {
 		t.Fatal()
@@ -94,5 +120,44 @@ func TestDB_Record(t *testing.T) {
 	// delete records
 	if result = db.Model(&User{}).Where("Name = ? and Age = ?", "nc-77", 23).Delete(); result.Error != nil {
 		t.Fatal(result.Error)
+	}
+}
+
+func TestDB_Hock(t *testing.T) {
+	var u0, u1 UserWithHocks
+	u1.Id = 1
+	if err := db.CreateTable(UserWithHocks{}).Error; err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Create(&u0, &u1).Error; err != nil {
+		t.Fatal(err)
+	}
+	t.Run("beforeInsert && afterFind", func(t *testing.T) {
+		var foundUser UserWithHocks
+		if err := db.First(&foundUser).Error; err != nil {
+			t.Fatal(err)
+		}
+		if foundUser.Id != 1000 || foundUser.Password != "******" {
+			t.Fatal("first hooks failed")
+		}
+		var foundUsers []UserWithHocks
+		if err := db.Find(&foundUsers).Error; err != nil {
+			t.Fatal(err)
+		}
+		if foundUsers[0].Id != 1000 || foundUsers[1].Id != 1001 {
+			t.Fatal("insert hooks failed")
+		}
+	})
+	t.Run("before delete && after delete", func(t *testing.T) {
+		var user UserWithHocks
+		if err := db.Model(&user).Where("Id = ?", 1000).Delete().Error; err != nil {
+			t.Fatal(err)
+		}
+		if !user.BfDelete || !user.AtDelete {
+			t.Fatal("delete hooks failed")
+		}
+	})
+	if err := db.DropTable(UserWithHocks{}).Error; err != nil {
+		t.Fatal(err)
 	}
 }

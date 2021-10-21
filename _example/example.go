@@ -8,10 +8,23 @@ import (
 )
 
 type User struct {
-	Id      uint `miniorm:"PRIMARY KEY"`
-	Name    string
-	Age     int
-	IsValid bool
+	Id       uint `miniorm:"PRIMARY KEY"`
+	Name     string
+	Age      int
+	Password string
+	IsValid  bool
+}
+
+// AfterFirst hook.It will be called after calling first().
+// Miniorm support hooks including before/after First/Insert/Delete. You can use them by adding the methods shown below.
+func (u *User) AfterFirst() error {
+	u.Password = "******"
+	return nil
+}
+
+func (u *User) BeforeInsert() error {
+	u.Id += 1000
+	return nil
 }
 
 func main() {
@@ -32,8 +45,8 @@ func main() {
 	// Records
 	users := []User{{Id: 1, Name: "nic", Age: 11, IsValid: true}, {Id: 2, Name: "nc-77", Age: 22, IsValid: true}, {Id: 3, Name: "nc-77", Age: 11, IsValid: false}}
 	// Create
-	db.Create(users[0], users[1], users[2])
-	db.CreateMany(users)
+	db.Create(&users[0], &users[1], &users[2])
+	db.CreateMany(&users)
 
 	var foundUsers []User
 	var foundUser User

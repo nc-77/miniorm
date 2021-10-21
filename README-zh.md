@@ -1,4 +1,4 @@
-# miniorm
+# miniorm[![Go Reference](https://pkg.go.dev/badge/github.com/nc-77/miniorm.svg)](https://pkg.go.dev/github.com/nc-77/miniorm)![example workflow](https://github.com/nc-77/miniorm/actions/workflows/go.yml/badge.svg)
 
 [English](https://github.com/nc-77/miniorm/blob/main/README.md) | 中文
 
@@ -10,9 +10,10 @@ miniorm 是一个轻量级，快速的orm框架。框架提供接口主要参考
 
 - 简洁，直观的API提供
 - 更加自由，用户可控度更高的SQL接口提供
-- 支持链式调用
 - 表的创建，删除以及主键的设置
 - 记录的增删更查
+- 支持链式调用
+- 支持钩子
 - ...
 
 ## 使用
@@ -71,7 +72,6 @@ func main(){
 ## 代办事项
 
 - 支持事务
-- 支持钩子
 - 更多的API提供
 - 更多的数据库支持
 - 完善相关文档以及注释
