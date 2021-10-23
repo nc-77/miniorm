@@ -1,6 +1,7 @@
 package miniorm
 
 import (
+	"errors"
 	"os"
 	"testing"
 
@@ -72,6 +73,9 @@ func TestDB_Table(t *testing.T) {
 }
 
 func TestDB_Record(t *testing.T) {
+	defer func() {
+		db.DropTable(&User{})
+	}()
 	user0 := User{Id: 0, Name: "nic", Age: 18}
 	user1 := &User{Id: 1, Name: "nc-77", Age: 20}
 	// create table
@@ -160,4 +164,48 @@ func TestDB_Hock(t *testing.T) {
 	if err := db.DropTable(UserWithHocks{}).Error; err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestDB_Transaction(t *testing.T) {
+	defer func() {
+		db.DropTable(&User{})
+	}()
+	user0 := User{Id: 0, Name: "nic", Age: 18}
+	user1 := User{Id: 1, Name: "nc-77", Age: 20}
+	db.CreateTable(&User{})
+
+	t.Run("commit", func(t *testing.T) {
+		if err := db.Transaction(func(db *DB) (err error) {
+			if err = db.Create(&user0).Error; err != nil {
+				return
+			}
+			if err = db.Create(&user1).Error; err != nil {
+				return
+			}
+			return
+		}); err != nil {
+			t.Fatal(err)
+		}
+		var user []User
+		db.Find(&user)
+		if user[0] != user0 || user[1] != user1 {
+			t.Fatal("commit failed")
+		}
+	})
+
+	t.Run("rollback", func(t *testing.T) {
+		if err := db.Transaction(func(db *DB) error {
+			db.Model(user0).Update(map[string]interface{}{"Id": user0.Id + 1000})
+			db.Model(user1).Update(map[string]interface{}{"Age": user1.Age + 1})
+			return errors.New("error")
+		}); err == nil {
+			t.Fatal("rollback failed")
+		}
+		var user []User
+		db.Find(&user)
+		if user[0] != user0 || user[1] != user1 {
+			t.Fatal("rollback failed")
+		}
+	})
+
 }

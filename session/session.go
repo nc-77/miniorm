@@ -14,6 +14,7 @@ import (
 
 type Session struct {
 	db       *sql.DB
+	tx       *sql.Tx
 	sql      strings.Builder
 	sqlArgs  []interface{}
 	dialect  dialect.Dialect // set when init
@@ -88,7 +89,7 @@ func (s *Session) Raw(sql string, args ...interface{}) *Session {
 func (s *Session) Exec() (result sql.Result, err error) {
 	defer s.clear()
 	log.Info(s.toSql())
-	result, err = s.db.Exec(s.sql.String(), s.sqlArgs...)
+	result, err = s.DB().Exec(s.sql.String(), s.sqlArgs...)
 	if err != nil {
 		log.Error(err)
 	}
@@ -99,7 +100,7 @@ func (s *Session) Exec() (result sql.Result, err error) {
 func (s *Session) Query() (rows *sql.Rows, err error) {
 	defer s.clear()
 	log.Info(s.toSql())
-	rows, err = s.db.Query(s.sql.String(), s.sqlArgs...)
+	rows, err = s.DB().Query(s.sql.String(), s.sqlArgs...)
 	if err != nil {
 		log.Error(err)
 	}
@@ -110,7 +111,7 @@ func (s *Session) Query() (rows *sql.Rows, err error) {
 func (s *Session) QueryRow() (row *sql.Row) {
 	defer s.clear()
 	log.Info(s.toSql())
-	row = s.db.QueryRow(s.sql.String(), s.sqlArgs...)
+	row = s.DB().QueryRow(s.sql.String(), s.sqlArgs...)
 
 	return
 }

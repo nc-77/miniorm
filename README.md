@@ -12,8 +12,9 @@ This project began as a way to learn Golang. **Don't use in any production envir
 - More freedom SQL API supported
 - Table CRUD and primary key settings
 - Record CRUD
-- Support for chain calls
+- Transaction
 - Hooks
+- Support for chain calls
 - ...
 
 ## Usage
@@ -71,7 +72,6 @@ Please see [example.go](https://github.com/nc-77/miniorm/blob/main/_example/exam
 
 ## Todo
 
-- Transaction
 - More API supported
 - More Database supported
 - More complete documentation and notes

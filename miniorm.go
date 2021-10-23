@@ -15,6 +15,8 @@ type DB struct {
 	session *session.Session
 }
 
+type Txfunc func(db *DB) (err error)
+
 // Open initialize db session based on dsn
 func Open(drive, dsn string) (*DB, error) {
 	db, err := sql.Open(drive, dsn)
@@ -145,18 +147,43 @@ func (db *DB) OrderBy(values ...interface{}) *DB {
 	return db
 }
 
+// Raw build sql and sqlArgs
 func (db *DB) Raw(sql string, args ...interface{}) *DB {
 	_ = db.session.Raw(sql, args...)
 	return db
 }
+
+// Exec execute raw sql
 func (db *DB) Exec() (result sql.Result, err error) {
 	return db.session.Exec()
 }
 
+// Query executes a sql query
 func (db *DB) Query() (rows *sql.Rows, err error) {
 	return db.session.Query()
 }
 
+// QueryRow executes a query that is expected to return at most one row.
 func (db *DB) QueryRaw() (row *sql.Row) {
 	return db.session.QueryRow()
+}
+
+// Transaction start a transaction , return error will rollback, otherwise to commit.
+func (db *DB) Transaction(f Txfunc) (err error) {
+	if err = db.session.Begin(); err != nil {
+		return err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = db.session.Rollback()
+			panic(p)
+		}
+		if err != nil {
+			_ = db.session.Rollback()
+		} else {
+			err = db.session.Commit()
+		}
+	}()
+	err = f(db)
+	return
 }

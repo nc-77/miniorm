@@ -61,10 +61,27 @@ func main() {
 	// Update
 	users[1].Age++
 	users[1].IsValid = false
-	db.Update(users[1], users[2])                                                                                 // default save all fields even if it is zero
-	db.Model(users[2]).Update(map[string]interface{}{"Age": users[2].Age + 1, "IsValid": false})                  // update specific fields
-	db.Model(User{}).Where("id = ?", 3).Update(map[string]interface{}{"Age": users[2].Age + 1, "IsValid": false}) // add where condition
+	// default save all fields even if it is zero
+	db.Update(users[1], users[2])
+	// update specific fields
+	db.Model(users[2]).Update(map[string]interface{}{"Age": users[2].Age + 1, "IsValid": false})
+	// add where condition
+	db.Model(User{}).Where("id = ?", 3).Update(map[string]interface{}{"Age": users[2].Age + 1, "IsValid": false})
 
 	// Delete
 	db.Model(User{}).Where("id = ?", 3).Delete()
+
+	// Raw SQL and SQL builder
+	db.Raw("SELECT Id,Name,Age FROM `User` WHERE IsValid = ?", true).Query()
+	db.Raw("INSERT INTO `User` (Id,Name,Age,IsValid) VALUES (1010,'nic',12,true)").Exec()
+
+	// Transactions
+	db.Transaction(func(db *miniorm.DB) (err error) {
+		users[0].Age++
+		err = db.Update(users[0]).Error
+		err = db.Create(users[0]).Error
+		// if err is not nil, it will rollback and return err, otherwise commit
+		return
+	})
+
 }

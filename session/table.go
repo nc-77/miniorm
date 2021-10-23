@@ -17,7 +17,7 @@ func (s *Session) CreateTable() (err error) {
 	}
 
 	args := strings.Join(fields, ",")
-	_, err = s.Raw(fmt.Sprintf("CREATE TABLE `%s` (%s)", table.Name, args)).Exec()
+	_, err = s.Raw(fmt.Sprintf("CREATE TABLE IF NOT EXISTS `%s` (%s)", table.Name, args)).Exec()
 
 	return
 }
